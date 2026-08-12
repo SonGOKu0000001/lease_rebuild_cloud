@@ -1,0 +1,41 @@
+# ===================== Maven / Java 构建产物 =====================
+**/target/
+*.class
+*.jar
+*.war
+
+# ===================== 后端含敏感信息的配置（脱敏模板见同目录 *.example） =====================
+# 真实配置含 MySQL 密码、MinIO 密钥、邮箱授权码、内网 IP，禁止提交
+lease_cloud/**/src/main/resources/application.yml
+lease_cloud/**/src/main/resources/application-*.yml
+# 本地未跟踪的密钥覆盖文件（如以后新增）
+lease_cloud/**/src/main/resources/application-local.yml
+lease_cloud/**/src/main/resources/application-*.local.yml
+
+# ===================== 前端密钥（高德 Key/安全密钥改为从 .env 读取，见 .env.example；源码 config.ts 仍入库） =====================
+# 仅忽略存放真实密钥的本地环境变量文件
+**/.env.local
+**/.env.*.local
+# 注意：已提交的 .env.development / .env.production / .env.test 仅含 BASE_URL 与标题，无密钥，正常入库
+
+# ===================== IDE =====================
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ===================== 前端构建产物 / 依赖（子模块已有，这里兜底） =====================
+**/node_modules/
+**/dist/
+**/dist-ssr/
+coverage/
+
+# ===================== 打包产物 =====================
+*.zip
+
+# ===================== Vite 临时缓存文件 =====================
+*.timestamp-*.mjs
+
+# ===================== 日志 =====================
+*.log
+logs/

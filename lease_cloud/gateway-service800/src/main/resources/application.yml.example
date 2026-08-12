@@ -1,0 +1,61 @@
+# 脱敏模板：复制为 application.yml 并填入真实配置（application.yml 已被 .gitignore 忽略，不会上传 Gitee）
+server:
+  port: 800
+
+spring:
+  application:
+    name: lease-gateway
+  cloud:
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+        port: 8719
+      log:
+        dir: E:/logs/myapp/sentinel
+    nacos:
+      server-addr: 127.0.0.1:8848
+      config:
+        namespace: public
+        group: DEFAULT_GROUP
+        file-extension: yml
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: auth_admin_login
+              uri: lb://lease-auth-service
+              predicates:
+                - Path=/admin/login/**,/admin/info**
+
+            - id: auth_app_login
+              uri: lb://lease-auth-service
+              predicates:
+                - Path=/app/login/**,/app/info**
+
+            - id: apartment_admin
+              uri: lb://lease-apartment-service
+              predicates:
+                - Path=/admin/apartment/**,/admin/attr/**,/admin/facility/**,/admin/fee/**,/admin/file/**,/admin/label/**,/admin/term/**,/admin/payment/**,/admin/region/**,/admin/room/**
+
+            - id: apartment_app
+              uri: lb://lease-apartment-service
+              predicates:
+                - Path=/app/apartment/**,/app/history/**,/app/payment/**,/app/region/**,/app/room/**,/app/term/**
+
+            - id: agreement_admin
+              uri: lb://lease-agreement-service
+              predicates:
+                - Path=/admin/agreement/**,/admin/appointment/**
+
+            - id: agreement_app
+              uri: lb://lease-agreement-service
+              predicates:
+                - Path=/app/agreement/**,/app/appointment/**
+
+            - id: user_admin
+              uri: lb://lease-user-service
+              predicates:
+                - Path=/admin/system/**,/admin/user/**
+  config:
+    import:
+      - nacos:application.yml

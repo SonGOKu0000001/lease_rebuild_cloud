@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kami.cloud.lease.web.app.mapper.RoomInfoMapper">
+
+    <select id="pageWithRoomQueryVo" resultType="com.kami.cloud.lease.model.entity.RoomInfo">
+        SELECT ri.*
+        FROM room_info ri
+        WHERE ri.is_deleted = 0
+
+        <!-- 1. 租金范围（直接在 ri 表） -->
+        <if test="queryVo.minRent != null">
+            AND ri.rent >= #{queryVo.minRent}
+        </if>
+        <if test="queryVo.maxRent != null">
+            AND ri.rent &lt;= #{queryVo.maxRent}
+        </if>
+
+        <!-- 2. 区域筛选（省/市/区 在 apartment_info 表，用 EXISTS） -->
+        <if test="queryVo.provinceId != null or queryVo.cityId != null or queryVo.districtId != null">
+            AND EXISTS (
+            SELECT 1 FROM apartment_info ai
+            WHERE ai.id = ri.apartment_id
+            AND ai.is_deleted = 0
+            <if test="queryVo.provinceId != null">
+                AND ai.province_id = #{queryVo.provinceId}
+            </if>
+            <if test="queryVo.cityId != null">
+                AND ai.city_id = #{queryVo.cityId}
+            </if>
+            <if test="queryVo.districtId != null">
+                AND ai.district_id = #{queryVo.districtId}
+            </if>
+            )
+        </if>
+
+        <!-- 3. 支付方式筛选（在 room_payment_type 表，用 EXISTS） -->
+        <if test="queryVo.paymentTypeId != null">
+            AND EXISTS (
+            SELECT 1 FROM room_payment_type rpt
+            WHERE rpt.room_id = ri.id
+            AND rpt.id = #{queryVo.paymentTypeId}
+            AND rpt.is_deleted = 0
+            )
+        </if>
+
+        <!-- 4. 排序（只允许 asc/desc，必须校验防止注入） -->
+        <if test="queryVo.orderType != null and queryVo.orderType != ''">
+            ORDER BY ri.rent ${queryVo.orderType}
+        </if>
+    </select>
+    <select id="selectMinRentByApartmentId" resultType="java.math.BigDecimal">
+        select min(rent)
+        from room_info
+        where is_deleted = 0
+          and is_release = 1
+          and apartment_id = #{id}
+    </select>
+    <select id="pageWithApartmentId" resultType="com.kami.cloud.lease.model.entity.RoomInfo">
+        select *
+        from room_info
+        where is_deleted = 0
+          and is_release = 1
+          and apartment_id = #{id}
+    </select>
+</mapper>

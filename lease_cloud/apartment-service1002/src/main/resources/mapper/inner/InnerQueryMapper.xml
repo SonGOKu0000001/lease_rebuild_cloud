@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kami.cloud.lease.web.inner.mapper.InnerQueryMapper">
+
+    <select id="selectGraphsByItemTypeAndIds" resultType="com.kami.cloud.lease.common.feign.dto.GraphDTO">
+        select id,
+               name,
+               url,
+               item_id as itemId
+        from graph_info
+        where is_deleted = 0
+          and item_type = #{itemType}
+          and item_id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectApartmentIdsByRegion" resultType="java.lang.Long">
+        select id
+        from apartment_info
+        where is_deleted = 0
+        <if test="provinceId != null">
+            and province_id = #{provinceId}
+        </if>
+        <if test="cityId != null">
+            and city_id = #{cityId}
+        </if>
+        <if test="districtId != null">
+            and district_id = #{districtId}
+        </if>
+    </select>
+
+    <select id="selectRoomIdsByNumber" resultType="java.lang.Long">
+        select id
+        from room_info
+        where is_deleted = 0
+          and room_number like concat('%', #{roomNumber}, '%')
+    </select>
+</mapper>
